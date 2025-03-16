@@ -11,7 +11,7 @@ public class Util {
     private final static String PASSWORD = "root";
     private Connection connection;
 
-    public Util(){
+    public Util() {
         try {
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
         } catch (SQLException e) {
@@ -19,11 +19,11 @@ public class Util {
         }
     }
 
-    public Connection getConnection(){
+    public Connection getConnection() {
         return connection;
     }
 
-    public void closeConnection(){
+    public void closeConnection() {
         try {
             connection.close();
         } catch (SQLException e) {
