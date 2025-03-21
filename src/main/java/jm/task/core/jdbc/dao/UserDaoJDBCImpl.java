@@ -12,38 +12,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
+    Connection connection;
 
     public UserDaoJDBCImpl() {
-
+        this.connection = Util.getConnection();
     }
 
     @Override
     public void createUsersTable() {
-        Connection connection = Util.getConnection();
         String sql = "CREATE TABLE users (id INT AUTO_INCREMENT UNIQUE, name VARCHAR(255) NOT NULL, lastname VARCHAR(255) NOT NULL, age INT)";
         try (Statement statement = connection.createStatement()) {
             statement.execute(sql);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        Util.closeConnection(connection);
     }
 
     @Override
     public void dropUsersTable() {
-        Connection connection = Util.getConnection();
         String sql = "DROP TABLE users";
         try (Statement statement = connection.createStatement()) {
             statement.execute(sql);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        Util.closeConnection(connection);
     }
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        Connection connection = Util.getConnection();
         User user = new User(name, lastName, age);
         String sql = "INSERT INTO users (name, lastname, age) VALUES (?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -66,18 +62,17 @@ public class UserDaoJDBCImpl implements UserDao {
                     System.out.println(ex.getMessage());
                 }
             }
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
-        try {
-            connection.setAutoCommit(true);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        Util.closeConnection(connection);
     }
 
     @Override
     public void removeUserById(long id) {
-        Connection connection = Util.getConnection();
         String sql = "DELETE FROM users WHERE id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             connection.setAutoCommit(false);
@@ -93,18 +88,17 @@ public class UserDaoJDBCImpl implements UserDao {
                     System.out.println(ex.getMessage());
                 }
             }
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
-        try {
-            connection.setAutoCommit(true);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        Util.closeConnection(connection);
     }
 
     @Override
     public List<User> getAllUsers() {
-        Connection connection = Util.getConnection();
         List<User> users = new ArrayList<>();
         try (Statement statement = connection.createStatement()) {
             String sql = "SELECT * FROM users";
@@ -120,13 +114,11 @@ public class UserDaoJDBCImpl implements UserDao {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        Util.closeConnection(connection);
         return users;
     }
 
     @Override
     public void cleanUsersTable() {
-        Connection connection = Util.getConnection();
         String sql = "DELETE FROM users";
         try (Statement statement = connection.createStatement()) {
             connection.setAutoCommit(false);
@@ -141,12 +133,12 @@ public class UserDaoJDBCImpl implements UserDao {
                     System.out.println(ex.getMessage());
                 }
             }
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
-        try {
-            connection.setAutoCommit(true);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        Util.closeConnection(connection);
     }
 }
